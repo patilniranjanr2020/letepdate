@@ -131,10 +131,15 @@ def analyze_with_gemini(procedure_name, search_term):
         "Procedure": "{procedure_name}",
         "Safest & Best Technique": "Name of safest technique",
         "Cost in India (INR)": "Estimated range in ₹ INR",
-        "Eliminate Permanent Organ Failure Risk?": "Yes / No / Partial",
+        "Can Permanent Organ/Tissue Failure Risk be Zero?": "Yes or No ONLY",
         "Recommended Age Limits": "e.g. 18 - 60 years",
-        "Clinical Rationale": "Brief 1-2 sentence medical rationale based on safety and organ risk"
+        "Clinical Rationale": "Brief 1-2 sentence medical rationale explaining why risk CAN or CANNOT be reduced to absolute zero even with the safest state-of-the-art technique."
     }}
+    
+    STRICT RULE FOR 'Can Permanent Organ/Tissue Failure Risk be Zero?':
+    - Output ONLY 'Yes' or 'No'. Do NOT use 'Partial', 'Depends', or 'Maybe'.
+    - If it is IMPOSSIBLE to guarantee zero permanent damage or organ/tissue failure risk (even using the safest, highest state-of-the-art technology available), you MUST answer 'No'.
+    - Only answer 'Yes' if the procedure is purely superficial/external or pre-screened such that permanent systemic organ/tissue failure risk is genuinely zero.
     """
     
     headers = {
@@ -212,12 +217,13 @@ if selected_procedures:
     # Detailed Insights Accordion
     st.subheader("🔍 Deep-Dive AI Clinical Insights")
     for row in matrix_data:
-        with st.expander(f"🔬 {row['Procedure']} — {row['Safest & Best Technique']}"):
+        with st.expander(f"🔬 {row.get('Procedure', '')} — {row.get('Safest & Best Technique', '')}"):
             c1, c2, c3 = st.columns(3)
-            c1.metric("Est. Cost in India (INR)", row["Cost in India (INR)"])
-            c2.metric("Can Organ Failure Risk be Zero?", row["Eliminate Permanent Organ Failure Risk?"])
-            c3.metric("Age Limits", row["Recommended Age Limits"])
-            st.markdown(f"**AI Safety Rationale:** {row['Clinical Rationale']}")
+            c1.metric("Est. Cost in India (INR)", row.get("Cost in India (INR)", "N/A"))
+            c2.metric("Can Permanent Risk be Zero?", row.get("Can Permanent Organ/Tissue Failure Risk be Zero?", "No"))
+            c3.metric("Age Limits", row.get("Recommended Age Limits", "N/A"))
+            st.markdown(f"**AI Safety Rationale:** {row.get('Clinical Rationale', 'N/A')}")
+
 else:
     st.info("Please select at least one procedure from the sidebar.")
 
